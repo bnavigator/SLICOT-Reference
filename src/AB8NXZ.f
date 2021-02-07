@@ -183,13 +183,13 @@ C     .. Array Arguments ..
 C     .. Local Scalars ..
       LOGICAL           LQUERY
       INTEGER           I1, IK, IROW, ITAU, IZ, JWORK, MM1, MNTAU, MNU,
-     $                  MPM, NP, RANK, RO1, TAU, WRKOPT
-      COMPLEX*16        TC
+     $                  MPM, NB, NP, RANK, RO1, TAU, WRKOPT
+      COMPLEX*16        TC, TCCONJ
 C     .. Local Arrays ..
       DOUBLE PRECISION  SVAL(3)
 C     .. External Subroutines ..
       EXTERNAL          MB3OYZ, MB3PYZ, XERBLA, ZLAPMT, ZLARFG, ZLASET,
-     $                  ZLATZM, ZUNMQR, ZUNMRQ
+     $                  SLCT_ZLATZM, ZUNMQR, ZUNMRQ
 C     .. Intrinsic Functions ..
       INTRINSIC         DCONJG, INT, MAX, MIN
 C     .. Executable Statements ..
@@ -302,7 +302,9 @@ C
             DO 40 I1 = 1, SIGMA
                CALL ZLARFG( RO+1, ABCD(IROW,I1), ABCD(IROW+1,I1), 1,
      $                      TC )
-               CALL ZLATZM( 'L', RO+1, MNU-I1, ABCD(IROW+1,I1), 1,
+C     RvP 170623 slicot-specific ZLATZM
+               TCCONJ = DCONJG( TC )
+               CALL SLCT_ZLATZM( 'L', RO+1, MNU-I1, ABCD(IROW+1,I1), 1,
      $                      DCONJG( TC ), ABCD(IROW,I1+1),
      $                      ABCD(IROW+1,I1+1), LDABCD, ZWORK )
                IROW = IROW + 1
