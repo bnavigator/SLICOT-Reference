@@ -212,9 +212,9 @@ C     .. Array Arguments ..
                  JOB        FACT    |  LDWORK
                  -------------------+-------------------
                  'X'        'F'     |  MAX(1,N)
-                 'X'        'N'     |  MAX(1,4*N)
+                 'X'        'N'     |  MAX(1,8*N+16)
                  'B', 'S'   'F'     |  MAX(1,2*N**2)
-                 'B', 'S'   'N'     |  MAX(1,2*N**2,4*N)
+                 'B', 'S'   'N'     |  MAX(1,2*N**2,8*N+16)
 
           For optimum performance, LDWORK should be larger.
 
@@ -236,7 +236,7 @@ C     .. Array Arguments ..
                 quasitriangular form;
           = 2:  FACT = 'N' and the pencil A - lambda * E cannot be
                 reduced to generalized Schur form: LAPACK routine
-                DGEGS (or DGGES) has failed to converge;
+                DGGES has failed to converge;
           = 3:  DICO = 'D' and the pencil A - lambda * E has a
                 pair of reciprocal eigenvalues. That is, lambda_i =
                 1/lambda_j for some i and j, where lambda_i and

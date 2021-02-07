@@ -167,7 +167,7 @@ C             of LDWORK.
 C
 C     LDWORK  INTEGER
 C             The dimension of the array DWORK.
-C             LDWORK >= MAX(1,4*N,6*N-6),  if FACT = 'N';
+C             LDWORK >= MAX(1,8*N+16),     if FACT = 'N';
 C             LDWORK >= MAX(1,2*N,6*N-6),  if FACT = 'F'.
 C             For good performance, LDWORK should be larger.
 C
@@ -195,7 +195,7 @@ C                   diagonal of the pencil A_s - lambda * E_s whose
 C                   eigenvalues are not conjugate complex;
 C             = 4:  FACT = 'N' and the pencil A - lambda * E cannot be
 C                   reduced to generalized Schur form: LAPACK routine
-C                   DGEGS (or DGGES) has failed to converge;
+C                   DGGES has failed to converge;
 C             = 5:  DICO = 'C' and the pencil A - lambda * E is not
 C                   c-stable;
 C             = 6:  DICO = 'D' and the pencil A - lambda * E is not
@@ -455,7 +455,7 @@ C     .. Array Arguments ..
      $                  BETA(*), DWORK(*), E(LDE,*), Q(LDQ,*), Z(LDZ,*)
 C     .. Local Scalars ..
       DOUBLE PRECISION  S1, S2, SAFMIN, WI, WR1, WR2
-      INTEGER           I, INFO1, MAXMN, MINGG, MINMN, MINWRK, OPTWRK
+      INTEGER           I, INFO1, MAXMN, MINMN, MINWRK, OPTWRK
       LOGICAL           ISDISC, ISFACT, ISTRAN, LQUERY
 C     .. Local Arrays ..
       DOUBLE PRECISION  E1(2,2)
@@ -465,7 +465,7 @@ C     .. External Functions ..
       LOGICAL           DELCTG, LSAME
       EXTERNAL          DELCTG, DLAMCH, DLAPY2, LSAME
 C     .. External Subroutines ..
-      EXTERNAL          DCOPY, DGEGS, DGEMM, DGEMV, DGEQRF, DGERQF,
+      EXTERNAL          DCOPY, DGEMM, DGEMV, DGEQRF, DGERQF,
      $                  DGGES, DLACPY, DLAG2, DLASET, DSCAL, DTRMM,
      $                  SG03BU, SG03BV, XERBLA
 C     .. Intrinsic Functions ..
@@ -510,15 +510,14 @@ C
          IF (ISFACT ) THEN
             MINWRK = MAX( 1, 2*N, 6*N-6 )
          ELSE
-            MINWRK = MAX( 1, 4*N, 6*N-6 )
+            MINWRK = MAX( 1, 8*N + 16 )
          END IF
-         MINGG = MAX( MINWRK, 8*N + 16 )
          IF( LQUERY ) THEN
             CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG, N,
      $                  A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA, Q, LDQ,
      $                  Z, LDZ, DWORK, -1, BWORK, INFO1 )
             MAXMN  = MAX( M, N )
-            OPTWRK = MAX( MINGG, INT( DWORK(1) ), N*MAXMN )
+            OPTWRK = MAX( MINWRK, INT( DWORK(1) ), N*MAXMN )
             IF ( .NOT.ISTRAN ) THEN
                CALL DGEQRF( MAXMN, N, B, LDB, DWORK, DWORK, -1, INFO1 )
             ELSE
@@ -569,24 +568,9 @@ C
 C           A := Q**T * A * Z   (upper quasitriangular)
 C           E := Q**T * E * Z   (upper triangular)
 C
-         IF ( LDWORK .LT. MINGG ) THEN
-C
-C           Use DGEGS for backward compatibilty with LDWORK value.
-C           ( Workspace: >= MAX(1,4*N) )
-C
-            CALL DGEGS( 'Vectors', 'Vectors', N, A, LDA, E, LDE, ALPHAR,
-     $                  ALPHAI, BETA, Q, LDQ, Z, LDZ, DWORK, LDWORK,
-     $                  INFO1 )
-         ELSE
-C
-C           Use DGGES. The workspace is increased to avoid an error
-C           return, while it should not really be larger than above.
-C           ( Workspace: >= MAX(1,8*N+16) )
-C
-            CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG, N,
-     $                  A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA, Q, LDQ,
-     $                  Z, LDZ, DWORK, LDWORK, BWORK, INFO1 )
-         END IF
+         CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG, N,
+     $               A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA, Q, LDQ,
+     $               Z, LDZ, DWORK, LDWORK, BWORK, INFO1 )
          IF ( INFO1 .NE. 0 ) THEN
             INFO = 4
             RETURN

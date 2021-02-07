@@ -194,7 +194,7 @@ C     .. Array Arguments ..
 
   LDWORK  INTEGER
           The dimension of the array DWORK.
-          LDWORK &gt;= MAX(1,4*N,6*N-6),  if FACT = 'N';
+          LDWORK &gt;= MAX(1,8*N+16),  if FACT = 'N';
           LDWORK &gt;= MAX(1,2*N,6*N-6),  if FACT = 'F'.
           For good performance, LDWORK should be larger.
 
@@ -223,7 +223,7 @@ C     .. Array Arguments ..
                 eigenvalues are not conjugate complex;
           = 4:  FACT = 'N' and the pencil A - lambda * E cannot be
                 reduced to generalized Schur form: LAPACK routine
-                DGEGS (or DGGES) has failed to converge;
+                or DGGES has failed to converge;
           = 5:  DICO = 'C' and the pencil A - lambda * E is not
                 c-stable;
           = 6:  DICO = 'D' and the pencil A - lambda * E is not

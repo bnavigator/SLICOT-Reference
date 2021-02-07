@@ -183,9 +183,9 @@ C
 C                    JOB        FACT    |  LDWORK
 C                    -------------------+-------------------
 C                    'X'        'F'     |  MAX(1,N)
-C                    'X'        'N'     |  MAX(1,4*N)
+C                    'X'        'N'     |  MAX(1,8*N+16)
 C                    'B', 'S'   'F'     |  MAX(1,2*N**2)
-C                    'B', 'S'   'N'     |  MAX(1,2*N**2,4*N)
+C                    'B', 'S'   'N'     |  MAX(1,2*N**2,8*N+16)
 C
 C             For optimum performance, LDWORK should be larger.
 C
@@ -206,7 +206,7 @@ C                   Hessenberg part of the array A is not in upper
 C                   quasitriangular form;
 C             = 2:  FACT = 'N' and the pencil A - lambda * E cannot be
 C                   reduced to generalized Schur form: LAPACK routine
-C                   DGEGS (or DGGES) has failed to converge;
+C                   DGGES has failed to converge;
 C             = 3:  DICO = 'D' and the pencil A - lambda * E has a
 C                   pair of reciprocal eigenvalues. That is, lambda_i =
 C                   1/lambda_j for some i and j, where lambda_i and
@@ -375,7 +375,7 @@ C     .. Array Arguments ..
 C     .. Local Scalars ..
       CHARACTER         ETRANS
       DOUBLE PRECISION  EST, EPS, NORMA, NORME, SCALE1
-      INTEGER           I, INFO1, KASE, MINGG, MINWRK, OPTWRK
+      INTEGER           I, INFO1, KASE, MINWRK, OPTWRK
       LOGICAL           ISDISC, ISFACT, ISTRAN, ISUPPR, LQUERY, WANTBH,
      $                  WANTSP, WANTX
 C     .. Local Arrays ..
@@ -386,7 +386,7 @@ C     .. External Functions ..
       LOGICAL           DELCTG, LSAME
       EXTERNAL          DELCTG, DLAMCH, DNRM2, LSAME
 C     .. External Subroutines ..
-      EXTERNAL          DCOPY, DGEGS, DGGES, DLACN2, MB01RD, MB01RW,
+      EXTERNAL          DCOPY, DGGES, DLACN2, MB01RD, MB01RW,
      $                  SG03AX, SG03AY, XERBLA
 C     .. Intrinsic Functions ..
       INTRINSIC         DBLE, INT, MAX, MIN
@@ -436,25 +436,17 @@ C
             IF ( ISFACT ) THEN
                MINWRK = MAX( N, 1 )
             ELSE
-               MINWRK = MAX( 4*N, 1 )
+               MINWRK = MAX( 8*N+16, 1 )
             END IF
          ELSE
             IF ( ISFACT ) THEN
                MINWRK = MAX( 2*N*N, 1 )
             ELSE
-               MINWRK = MAX( 2*N*N, 4*N, 1 )
+               MINWRK = MAX( 2*N*N, 8*N+16, 1 )
             END IF
          END IF
-         MINGG = MAX( MINWRK, 8*N + 16 )
          IF( LQUERY ) THEN
-            IF ( ISFACT ) THEN
-               OPTWRK = MINGG
-            ELSE
-               CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG,
-     $                     N, A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA,
-     $                     Q, LDQ, Z, LDZ, DWORK, -1, BWORK, INFO1 )
-               OPTWRK = MAX( MINGG, INT( DWORK(1) ), N*N )
-            END IF
+            OPTWRK = MAX( MINWRK, 8*N + 16 )
          ELSE IF ( MINWRK .GT. LDWORK ) THEN
             INFO = -25
          END IF
@@ -497,24 +489,9 @@ C
 C           A := Q**T * A * Z   (upper quasitriangular)
 C           E := Q**T * E * Z   (upper triangular)
 C
-         IF ( LDWORK .LT. MINGG ) THEN
-C
-C           Use DGEGS for backward compatibilty with LDWORK value.
-C           ( Workspace: >= MAX(1,4*N) )
-C
-            CALL DGEGS( 'Vectors', 'Vectors', N, A, LDA, E, LDE, ALPHAR,
-     $                  ALPHAI, BETA, Q, LDQ, Z, LDZ, DWORK, LDWORK,
-     $                  INFO1 )
-         ELSE
-C
-C           Use DGGES. The workspace is increased to avoid an error
-C           return, while it should not really be larger than above.
-C           ( Workspace: >= MAX(1,8*N+16) )
-C
-            CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG, N,
-     $                  A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA, Q, LDQ,
-     $                  Z, LDZ, DWORK, LDWORK, BWORK, INFO1 )
-         END IF
+         CALL DGGES( 'Vectors', 'Vectors', 'Not ordered', DELCTG, N,
+     $               A, LDA, E, LDE, I, ALPHAR, ALPHAI, BETA, Q, LDQ,
+     $               Z, LDZ, DWORK, LDWORK, BWORK, INFO1 )
          IF ( INFO1 .NE. 0 ) THEN
             INFO = 2
             RETURN
