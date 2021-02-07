@@ -1,3 +1,5 @@
+**NOTE: The changes in this branch `slycot-changes` come from Slycot, and are under GPL.**
+
 SLICOT Library Root Directory
 -----------------------------
 
