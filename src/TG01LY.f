@@ -284,7 +284,7 @@ C     .. External Functions ..
       EXTERNAL           DLAMCH, DLANGE, DLANTR, DLAPY2, DNRM2
 C     .. External Subroutines ..
       EXTERNAL           DCOPY, DLACPY, DLAPMT, DLARFG, DLARTG, DLASET,
-     $                   DLATZM, DORMQR, DROT, DSWAP, DTRCON, MB03OY,
+     $                   SLCT_DLATZM, DORMQR, DROT, DSWAP, DTRCON, MB03OY,
      $                   XERBLA
 C     .. Intrinsic Functions ..
       INTRINSIC          DBLE, INT, MAX, MIN, MOD
@@ -499,14 +499,14 @@ C
          DO 70 ICOL = 1, SIGMA
             IROW = IROW + 1
             CALL DLARFG( RO+1, A(IROW,ICOL), A(IROW+1,ICOL), 1, T )
-            CALL DLATZM( 'L', RO+1, N-ICOL, A(IROW+1,ICOL), 1, T,
+            CALL SLCT_DLATZM( 'L', RO+1, N-ICOL, A(IROW+1,ICOL), 1, T,
      $                   A(IROW,ICOL+1), A(IROW+1,ICOL+1), LDA, DWORK )
-            CALL DLATZM( 'L', RO+1, RANKE, A(IROW+1,ICOL), 1, T,
+            CALL SLCT_DLATZM( 'L', RO+1, RANKE, A(IROW+1,ICOL), 1, T,
      $                   E(IROW,ND+1), E(IROW+1,ND+1), LDE, DWORK )
             IF( COMPQ )
-     $         CALL DLATZM( 'R', N, RO+1, A(IROW+1,ICOL), 1, T,
+     $         CALL SLCT_DLATZM( 'R', N, RO+1, A(IROW+1,ICOL), 1, T,
      $                      Q(1, IROW), Q(1, IROW+1), LDQ, DWORK )
-            CALL DLATZM( 'L', RO+1, M, A(IROW+1,ICOL), 1, T,
+            CALL SLCT_DLATZM( 'L', RO+1, M, A(IROW+1,ICOL), 1, T,
      $                   B(IROW,1), B(IROW+1,1), LDB, DWORK )
             CALL DCOPY( ND-ICOL, DUM, 0, A(IROW+1, ICOL), 1 )
    70    CONTINUE
